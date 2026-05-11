@@ -18,11 +18,12 @@ export default function App() {
       console.error("Erro ao buscar dados:", err);
     }
   };
-
+//
   useEffect(() => {
     fetchReviews();
   }, []);
 
+  // Função para buscar a capa do filme usando a API do TMDB
   const buscarCapa = async () => {
     if (!form.title) return alert("Digite o nome do filme!");
     try {
@@ -54,6 +55,7 @@ const handleEdit = (review) => {
   setModal("edit");
 };
 
+// Função para enviar os dados do formulário (tanto para criação quanto para edição)
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
@@ -131,6 +133,7 @@ const handleEdit = (review) => {
   )}
 </main>
 
+// Modal para adicionar/editar review
       {modal && (
         <div className="modal-overlay">
           <div className="modal">

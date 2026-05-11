@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const app = express();
 
-// --- CONFIGURAÇÕES ---
+// Configurações do middleware
 app.use(cors()); 
 app.use(express.json()); 
 
@@ -16,7 +16,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 app.use('/uploads', express.static('uploads'));
 
-// --- BANCO DE DADOS ---
+// Banco de dados SQLite
 const db = new sqlite3.Database('./novo_database.sqlite', (err) => {
     if (err) console.error("Erro ao abrir banco", err);
     console.log("✅ Banco de dados SQLite conectado.");
@@ -30,7 +30,8 @@ const db = new sqlite3.Database('./novo_database.sqlite', (err) => {
     )`);
 });
 
-// --- ROTAS (CRUD) ---
+
+// Rota para obter todas as reviews
 
 app.get('/reviews', (req, res) => {
     db.all("SELECT * FROM reviews", [], (err, rows) => {
@@ -38,6 +39,8 @@ app.get('/reviews', (req, res) => {
         res.json(rows || []);
     });
 });
+
+// Rota para criar uma nova review
 
 app.post('/reviews', (req, res) => {
     const { title, rating, comment, image } = req.body;
@@ -53,6 +56,7 @@ app.post('/reviews', (req, res) => {
     });
 });
 
+// Rota para atualizar uma review existente
 app.put('/reviews/:id', (req, res) => {
     const { title, rating, comment, image } = req.body;
     const id = req.params.id;
@@ -63,6 +67,7 @@ app.put('/reviews/:id', (req, res) => {
     });
 });
 
+// Rota para deletar uma review
 app.delete('/reviews/:id', (req, res) => {
     const id = req.params.id;
     db.run("DELETE FROM reviews WHERE id = ?", id, function(err) {
@@ -71,7 +76,7 @@ app.delete('/reviews/:id', (req, res) => {
     });
 });
 
-// --- INICIALIZAÇÃO (Faltava isso!) ---
+// inicializacao do servidor
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
