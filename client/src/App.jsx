@@ -97,7 +97,6 @@ const handleEdit = (review) => {
       </nav>
 
       <main className="main">
-  {/* Se o tamanho do array for zero, mostra a frase. Senão, mostra o grid. */}
   {reviews.length === 0 ? (
     <div className="empty-state">
       <p>Nenhuma review por aqui ainda. Que tal adicionar o primeiro filme?</p>
@@ -133,7 +132,8 @@ const handleEdit = (review) => {
   )}
 </main>
 
-// Modal para adicionar/editar review
+{/* Modal para adicionar/editar review */}
+
       {modal && (
         <div className="modal-overlay">
           <div className="modal">
