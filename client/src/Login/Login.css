@@ -1,0 +1,215 @@
+/* RESET E VARIÁVEIS */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --green: #00e054;
+  --green-hover: #00b042;
+  --bg-dark: #121212; /* Fundo geral da tela */
+  --text-dark: #121212;
+  --text-muted: #666666;
+  --card-white: #ffffff; /* Card agora é branco */
+}
+
+body {
+  margin: 0;
+  --font-ui: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--bg-dark); /* Fundo da tela Dark */
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* PAINEL DA ESQUERDA (IMAGEM) */
+.photo-panel {
+    flex: 2; /* Mantendo o lado da foto maior */
+    position: relative;
+    background-color: #000;
+}
+
+.photo-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 1s ease-in-out;
+}
+
+/* No seu Login.css */
+.fade-in-bg {
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.3), #121212);
+}
+
+/* Ajuste do posicionamento solicitado */
+.top-logo {
+    position: absolute;
+    top: 100px; /* Descido conforme image_2064cc.jpg */
+    font-family: var(--font-ui);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    text-decoration: none;
+}
+
+/* PAINEL DA DIREITA (FORMULÁRIO COM FUNDO DARK) */
+.form-panel {
+  flex: 1;
+  background-color: var(--bg-dark); /* Fundo da direita também escuro */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+}
+
+/* LOGO CINELOG (SEM A PÍLULA) */
+/* No seu Login.css, substitua a classe .top-logo por esta: */
+.top-logo {
+    position: absolute;
+    top: 100px;
+    /* Alinhando com os padrões da Home */
+    font-family: var(--font-ui); 
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+    flex-shrink: 0;
+    /* Reset de estilos anteriores */
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* CARD BRANCO (Estilo solicitado) */
+.card {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--card-white); /* Card branco */
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.card h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.field {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+.field input:focus {
+  border-color: var(--green);
+}
+
+/* BOTÃO ENTRAR */
+.btn-primary {
+  width: 100%;
+  background-color: var(--green);
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 224, 84, 0.3);
+}
+
+/* DIVIDER E SOCIAL */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 25px 0;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+
+.social-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.social-btn {
+  background: #f5f5f5;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.social-btn:hover {
+  background: #e8e8e8;
+  transform: scale(1.1);
+}
+
+/* RESPONSIVO */
+@media (max-width: 850px) {
+  .photo-panel { display: none; }
+  .form-panel { width: 100%; }
+}

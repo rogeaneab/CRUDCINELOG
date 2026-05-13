@@ -3,10 +3,13 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken'); // Adicionado para segurança
 
 const app = express();
+const PORT = 3000;
+const SECRET_KEY = "cinelog_secret_key_2026"; // Chave para assinar o crachá (token)
 
-// Configurações do middleware
+// --- MIDDLEWARES ---
 app.use(cors()); 
 app.use(express.json()); 
 
@@ -16,68 +19,116 @@ if (!fs.existsSync(uploadDir)) {
 }
 app.use('/uploads', express.static('uploads'));
 
-// Banco de dados SQLite
-const db = new sqlite3.Database('./novo_database.sqlite', (err) => {
-    if (err) console.error("Erro ao abrir banco", err);
-    console.log("✅ Banco de dados SQLite conectado.");
-    
-    db.run(`CREATE TABLE IF NOT EXISTS reviews (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        rating INTEGER NOT NULL,
-        comment TEXT,
-        image TEXT
-    )`);
+// --- CONEXÃO COM O BANCO DE DADOS ---
+const db = new sqlite3.Database('./cine_database.sqlite', (err) => {
+    if (err) {
+        console.error("❌ Erro ao abrir banco de dados:", err.message);
+    } else {
+        console.log("✅ Banco de dados SQLite conectado.");
+        criarTabelas();
+    }
 });
 
+// --- CRIAÇÃO DAS TABELAS ---
+function criarTabelas() {
+    // Tabela de Reviews
+    db.run(`CREATE TABLE IF NOT EXISTS reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filmeTitulo TEXT NOT NULL,
+        filmeAno TEXT,
+        filmeGenero TEXT,
+        filmeDuracao TEXT,
+        filmePoster TEXT,
+        filmeBanner TEXT,
+        diretor TEXT,
+        nota INTEGER NOT NULL,
+        texto TEXT,
+        data TEXT
+    )`);
 
-// Rota para obter todas as reviews
+    // NOVA: Tabela de Usuários para o Login
+    db.run(`CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT,
+        email TEXT UNIQUE,
+        senha TEXT
+    )`, () => {
+        // Criar um usuário padrão para teste se a tabela estiver vazia
+        db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha) VALUES (?, ?, ?)`, 
+        ['Admin', 'admin@teste.com', '123456']);
+    });
+}
 
-app.get('/reviews', (req, res) => {
-    db.all("SELECT * FROM reviews", [], (err, rows) => {
+// --- MIDDLEWARE DE VERIFICAÇÃO (O "SEGURANÇA") ---
+function verificarJWT(req, res, next) {
+    const token = req.headers['x-access-token'];
+    if (!token) return res.status(401).json({ auth: false, message: 'Token não fornecido.' });
+
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+        if (err) return res.status(500).json({ auth: false, message: 'Falha ao autenticar token.' });
+        
+        req.userId = decoded.id;
+        next();
+    });
+}
+
+// --- ROTAS DE AUTENTICAÇÃO ---
+
+app.post('/login', (req, res) => {
+    const { email, senha } = req.body;
+
+    db.get("SELECT * FROM usuarios WHERE email = ? AND senha = ?", [email, senha], (err, user) => {
+        if (err) return res.status(500).json({ message: "Erro no servidor" });
+        
+        if (user) {
+            // Se achou o usuário, gera o token (crachá)
+            const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '24h' });
+            return res.json({ auth: true, token, nome: user.nome });
+        }
+
+        res.status(401).json({ message: "Login inválido!" });
+    });
+});
+
+// --- ROTAS DE REVIEWS (PROTEGIDAS) ---
+
+// Adicionamos 'verificarJWT' antes das funções para proteger os dados
+app.get('/reviews', verificarJWT, (req, res) => {
+    const sql = "SELECT * FROM reviews ORDER BY data DESC";
+    db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows || []);
     });
 });
 
-// Rota para criar uma nova review
+app.post('/reviews', verificarJWT, (req, res) => {
+    const { 
+        filmeTitulo, filmeAno, filmeGenero, filmeDuracao, 
+        filmePoster, filmeBanner, diretor, nota, texto, data 
+    } = req.body;
 
-app.post('/reviews', (req, res) => {
-    const { title, rating, comment, image } = req.body;
-    console.log("📥 Recebendo nova review:", title); // Log para debug
+    const sql = `INSERT INTO reviews 
+        (filmeTitulo, filmeAno, filmeGenero, filmeDuracao, filmePoster, filmeBanner, diretor, nota, texto, data) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    
+    const params = [filmeTitulo, filmeAno, filmeGenero, filmeDuracao, filmePoster, filmeBanner, diretor, nota, texto, data];
 
-    const sql = "INSERT INTO reviews (title, rating, comment, image) VALUES (?, ?, ?, ?)";
-    db.run(sql, [title, rating, comment, image], function(err) {
-        if (err) {
-            console.error("❌ Erro no SQL:", err.message);
-            return res.status(500).json({ error: err.message });
-        }
+    db.run(sql, params, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
         res.json({ id: this.lastID, success: true });
     });
 });
 
-// Rota para atualizar uma review existente
-app.put('/reviews/:id', (req, res) => {
-    const { title, rating, comment, image } = req.body;
-    const id = req.params.id;
-    const sql = "UPDATE reviews SET title = ?, rating = ?, comment = ?, image = ? WHERE id = ?";
-    db.run(sql, [title, rating, comment, image, id], function(err) {
+app.delete('/reviews/:id', verificarJWT, (req, res) => {
+    db.run("DELETE FROM reviews WHERE id = ?", req.params.id, function(err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ success: true });
     });
 });
 
-// Rota para deletar uma review
-app.delete('/reviews/:id', (req, res) => {
-    const id = req.params.id;
-    db.run("DELETE FROM reviews WHERE id = ?", id, function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true });
-    });
-});
+// Outras rotas (PUT, GET BY ID) também devem receber o verificarJWT...
 
-// inicializacao do servidor
-const PORT = 3000;
+// --- INICIALIZAÇÃO ---
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Back-end CineLog Protegido rodando em http://localhost:${PORT}`);
 });
