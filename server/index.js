@@ -126,6 +126,35 @@ app.delete('/reviews/:id', verificarJWT, (req, res) => {
     });
 });
 
+// --- ROTA DE EDIÇÃO (UPDATE) ---
+app.put('/reviews/:id', verificarJWT, (req, res) => {
+    const { id } = req.params;
+    const { 
+        filmeTitulo, filmeAno, filmeGenero, filmeDuracao, 
+        filmePoster, filmeBanner, diretor, nota, texto, data 
+    } = req.body;
+
+    const sql = `UPDATE reviews SET 
+        filmeTitulo = ?, filmeAno = ?, filmeGenero = ?, filmeDuracao = ?, 
+        filmePoster = ?, filmeBanner = ?, diretor = ?, nota = ?, texto = ?, data = ?
+        WHERE id = ?`;
+    
+    const params = [
+        filmeTitulo, filmeAno, filmeGenero, filmeDuracao, 
+        filmePoster, filmeBanner, diretor, nota, texto, data, id
+    ];
+
+    db.run(sql, params, function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        if (this.changes === 0) {
+            return res.status(404).json({ message: "Review não encontrada." });
+        }
+        
+        res.json({ success: true, message: "Review atualizada com sucesso!" });
+    });
+});
+
 // Outras rotas (PUT, GET BY ID) também devem receber o verificarJWT...
 
 // --- INICIALIZAÇÃO ---
