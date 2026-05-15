@@ -24,7 +24,7 @@ export default function Login() {
         );
         setCapas(res.data.results.slice(0, 10));
       } catch (err) {
-        console.error("Erro ao carregar posters exclusivos para o login", err);
+        console.error("Erro ao carregar posters exclusivos para o login", err); 
       }
     }
     fetchPosters();

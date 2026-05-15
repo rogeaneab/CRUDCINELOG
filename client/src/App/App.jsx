@@ -24,7 +24,7 @@ function App() {
         }
       />
 
-      {/* Rota para a LISTA de todas as reviews (O que o seu botão "Ver mais" busca) */}
+      {/* Rota para a LISTA de todas as reviews */}
       <Route
         path="/reviews"
         element={
@@ -34,7 +34,7 @@ function App() {
         }
       />
 
-      {/* Rota para uma review INDIVIDUAL (Caso queira abrir por ID no futuro) */}
+      {/* Rota para uma review INDIVIDUAL */}
       <Route
         path="/review/:id"
         element={

@@ -7,10 +7,10 @@ const API_BASE = "http://localhost:3000";
 const TMDB_KEY = "b04b3bee774c14e48850cbcb33a55d7d";
 
 export default function Home() {
-  const [filmesEmAlta, setFilmesEmAlta] = useState([]);
-  const [ultimasReviews, setUltimasReviews] = useState([]);
-  const [busca, setBusca] = useState("");
-  const [loadingFilmes, setLoadingFilmes] = useState(true);
+  const [filmesEmAlta, setFilmesEmAlta] = useState([]); // Estado para os filmes em alta
+  const [ultimasReviews, setUltimasReviews] = useState([]); 
+  const [busca, setBusca] = useState(""); 
+  const [loadingFilmes, setLoadingFilmes] = useState(true); 
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [erro, setErro] = useState(null);
   const [indiceHero, setIndiceHero] = useState(0);
@@ -57,17 +57,17 @@ export default function Home() {
 
   async function fetchUltimasReviews() {
     setLoadingReviews(true);
-    // AJUSTE: Pegamos o token do localStorage para passar pelo segurança do Back-end
+    // o token do localStorage para passar pelo segurança do Back-end 
     const token = localStorage.getItem("token");
 
     try {
       const { data } = await axios.get(`${API_BASE}/reviews`, {
-        headers: { 'x-access-token': token } // Enviando o "crachá"
+        headers: { 'x-access-token': token } // Enviando o "crachá" para o Back-end reconhecer quem é o usuário e retornar só as reviews dele
       });
       setUltimasReviews(data.slice(0, 3));
     } catch (err) {
       console.error("Erro ao carregar reviews:", err);
-      // Se o token for inválido, o erro cairá aqui
+      // Se o token for inválido, vai dar erro 401, e aí a gente desloga o usuário e pede para logar de novo
       if (err.response?.status === 401) {
         setErro("Sessão expirada. Por favor, faça login novamente.");
       }
@@ -89,7 +89,7 @@ export default function Home() {
     ));
   }
 
-  function formatarData(dataStr) {
+  function formatarData(dataStr) { 
     if (!dataStr) return "";
     const d = new Date(dataStr);
     return d.toLocaleDateString("pt-BR", {
@@ -99,7 +99,7 @@ export default function Home() {
     }).toUpperCase().replace(". ", " ").replace(".", "");
   }
 
-  // Lógica para sair do sistema (UI/UX)
+  // deslogar o usuario
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
@@ -111,7 +111,7 @@ export default function Home() {
     <div className="home-wrapper">
       <nav className="navbar">
         {/* Mudamos o link de entrar para sair caso o usuário queira deslogar */}
-        <button onClick={handleLogout} className="nav-link btn-logout-link">
+        <button onClick={handleLogout} className="nav-link btn-logout-link"> 
           Sair
         </button>
         <Link to="/home" className="logo">CineLog</Link>

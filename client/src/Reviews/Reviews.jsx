@@ -6,7 +6,7 @@ import "./Reviews.css";
 const API_BASE = "http://localhost:3000";
 const TMDB_KEY = "b04b3bee774c14e48850cbcb33a55d7d";
 
-const FORM_INICIAL = {
+const FORM_INICIAL = { // Estado inicial para o formulário de adicionar/editar review
   filmeId: "",
   filmeTitulo: "",
   filmeAno: "",
@@ -20,8 +20,7 @@ const FORM_INICIAL = {
   data: new Date().toISOString().split("T")[0],
 };
 
-// --- Sub-componentes mantidos (SeletorEstrelas, ReviewCard, ModalAdicionarReview, ModalReviewInfo) ---
-// Certifique-se de que eles estão no seu arquivo conforme o código anterior.
+// Componentes auxiliares para a página de Reviews (Seletor de estrelas, Card de review, Modais)
 
 function SeletorEstrelas({ valor, onChange, readonly = false }) {
   const [hover, setHover] = useState(0);
@@ -102,7 +101,7 @@ function ModalAdicionarReview({ aberto, onFechar, onSalvar, reviewParaEditar }) 
     } catch (err) { alert("Erro ao buscar dados na API."); }
   }
 
-  function handleChange(e) {
+  function handleChange(e) { // Lida com mudanças em qualquer campo do formulário
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
@@ -123,7 +122,7 @@ function ModalAdicionarReview({ aberto, onFechar, onSalvar, reviewParaEditar }) 
 
   if (!aberto) return null;
 
-  return (
+  return ( // Modal para adicionar ou editar uma review, dependendo se reviewParaEditar tem valor ou não
     <div className="modal-overlay" onClick={onFechar}>
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
@@ -135,7 +134,7 @@ function ModalAdicionarReview({ aberto, onFechar, onSalvar, reviewParaEditar }) 
             <legend className="form-legend">Dados do Filme</legend>
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Título *</label>
+                <label className="form-label">Título *</label> 
                 <div style={{ display: "flex", gap: "8px" }}>
                   <input name="filmeTitulo" value={form.filmeTitulo} onChange={handleChange} className="form-input" placeholder="Ex: Obsessão" required />
                   <button type="button" onClick={buscarDadosFilme} className="btn-buscar-api" title="Buscar dados do filme">🔍</button>
@@ -239,7 +238,7 @@ function ModalReviewInfo({ review, onFechar, onEditar, onDeletar }) {
 }
 
 // --- COMPONENTE PRINCIPAL ---
-
+// Componente principal da página de Reviews, onde são listadas as reviews do usuário e é possível adicionar, editar ou deletar uma review
 export default function Reviews() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -251,7 +250,6 @@ export default function Reviews() {
 
   const navigate = useNavigate();
 
-  // Função centralizada para pegar o cabeçalho de autenticação
   const getAuthHeaders = () => ({
     headers: { "x-access-token": localStorage.getItem("token") }
   });
@@ -260,7 +258,7 @@ export default function Reviews() {
     setLoading(true);
     setErro(null);
     try {
-      // AJUSTE: Enviando o token para buscar a lista
+      //busca as reviews do usuário logado, ordenadas da mais recente para a mais antiga
       const { data } = await axios.get(`${API_BASE}/reviews?_sort=data&_order=desc`, getAuthHeaders());
       setReviews(data);
     } catch (err) {
@@ -280,7 +278,7 @@ export default function Reviews() {
 
   async function salvarReview(form, id) {
     try {
-      // AJUSTE: Enviando o token para Criar/Editar
+      // o token do localStorage para passar pelo segurança do Back-end e permitir adicionar, editar ou deletar uma review, já que essas ações só podem ser feitas por um usuário logado
       if (id) {
         await axios.put(`${API_BASE}/reviews/${id}`, form, getAuthHeaders());
       } else {
@@ -295,7 +293,7 @@ export default function Reviews() {
 
   async function deletarReview(id) {
     try {
-      // AJUSTE: Enviando o token para Deletar
+      // deleta a review pelo id, usando o token do localStorage para passar pelo segurança do Back-end e permitir a exclusão
       await axios.delete(`${API_BASE}/reviews/${id}`, getAuthHeaders());
       await fetchReviews();
     } catch (err) {
